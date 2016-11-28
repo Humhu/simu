@@ -1,0 +1,4 @@
+# Service to set the pose of a simulated body
+geometry_msgs/Pose pose
+---
+geometry_msgs/Pose set_pose

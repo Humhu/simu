@@ -1,0 +1,5 @@
+# Service to set noise properties for a simulation
+bool enable_noise
+float64[] noise_mean
+float64[] noise_cov
+---

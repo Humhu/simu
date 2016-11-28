@@ -1,0 +1,4 @@
+# Service to set the velocity of a simulated object
+geometry_msgs/Twist velocity
+---
+geometry_msgs/Twist set_velocity
