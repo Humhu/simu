@@ -17,7 +17,11 @@ class SimulatorNode
 public:
 
 	SimulatorNode( ros::NodeHandle& nh, ros::NodeHandle& ph )
+	: _core( ph )
 	{
+		std::string worldFrame;
+		GetParamRequired( ph, "world_frame", worldFrame );
+
 		YAML::Node bodies;
 		GetParam( ph, "bodies", bodies );
 		YAML::Node::const_iterator iter;
@@ -30,7 +34,9 @@ public:
 			if( type == "mass" )
 			{
 				ros::NodeHandle mh( ph.resolveName( "bodies/" + name ) );
-				_bodyRegistry[ name ] = std::make_shared<SimulatedMass>( mh );
+				_bodyRegistry[ name ] = std::make_shared<SimulatedMass>
+				    ( nh, mh, worldFrame );
+				_core.RegisterObject( _bodyRegistry[name] );
 			}
 			else
 			{
@@ -52,12 +58,17 @@ public:
 				ros::NodeHandle mh( ph.resolveName( "sensors/" + name ) );
 				_sensorRegistry[ name ] = std::make_shared<SimulatedVelocitySensor>
 				    ( nh, mh, *_bodyRegistry.at(parent) );
+				_core.RegisterObject( _sensorRegistry[name] );
 			}
 			else
 			{
 				throw std::invalid_argument( "Unknown sensor type: " + type );
 			}
 		}
+
+		_initServer = ph.advertiseService( "initialize_sim",
+		                                   &SimulatorNode::InitializeCallback,
+		                                   this );
 	}
 
 private:
@@ -67,20 +78,18 @@ private:
 	BodyRegistry _bodyRegistry;
 	SensorRegistry _sensorRegistry;
 
+	ros::ServiceServer _initServer;
+	SimulationCore _core;
+
 	bool InitializeCallback( simu::InitializeSimulation::Request& req,
 	                         simu::InitializeSimulation::Response& res )
 	{
-		BodyRegistry::iterator biter;
-		for( biter = _bodyRegistry.begin(); biter != _bodyRegistry.end(); ++biter )
+		if( req.sim_time == ros::Time( 0 ) )
 		{
-			biter->second->Initialize( req.sim_time );
+			req.sim_time = ros::Time::now();
 		}
 
-		SensorRegistry::iterator siter;
-		for( siter = _sensorRegistry.begin(); siter != _sensorRegistry.end(); ++siter )
-		{
-			siter->second->Initialize( req.sim_time );
-		}
+		_core.Start( req.sim_time );
 		return true;
 	}
 };

@@ -11,37 +11,29 @@ namespace argus
 SimulatedVelocitySensor::SimulatedVelocitySensor( ros::NodeHandle& nh,
                                                   ros::NodeHandle& ph,
                                                   SimulatedBody& parent )
-: SimulatedSensor( nh, ph ),
+: SimulatedSensor( ph ),
   _parent( parent ),
-  _extrinsicsManager( nh, ph ), 
-  _noiseGenerator( POSE_DIM )
+  _extrinsicsManager( nh, ph )
 {
+	ros::NodeHandle ngh( ph.resolveName( "sensor_noise" ) );
+	_noise.Initialize( ngh, POSE_DIM );
+
 	unsigned int buffSize;
 	GetParam( ph, "buffer_size", buffSize, (unsigned int) 10 );
-	_velPub = ph.advertise<geometry_msgs::TwistStamped>( "velocity",
+	_velPub = ph.advertise<geometry_msgs::TwistStamped>( "velocity_raw",
 	                                                     buffSize );
 	GetParamRequired( ph, "frame_id", _frameID );
-	GetParam( ph, "enable_noise", _enableNoise, false );
-	if( _enableNoise )
-	{
-		PoseSE3::CovarianceMatrix cov;
-		GetParamRequired( ph, "noise_covariance", cov );
-		_noiseGenerator.SetCovariance( cov );
-	}
 }
 
 void SimulatedVelocitySensor::Sample( const ros::Time& now )
 {
 	PoseSE3::TangentVector velocity = _parent.GetVelocity();
-	PoseSE3 extrinsics = _extrinsicsManager.GetExtrinsics( _parent.GetFrameID(),
+	PoseSE3 extrinsics = _extrinsicsManager.GetExtrinsics( _parent.GetBodyFrame(),
 	                                                       _frameID,
 	                                                       now );
 	PoseSE3::TangentVector transformedVelocity = TransformTangent( velocity, 
 	                                                               extrinsics );
-	if( _enableNoise )
-	{
-		transformedVelocity += _noiseGenerator.Sample();
-	}
+	transformedVelocity += _noise.Sample();
 
 	geometry_msgs::TwistStamped msg;
 	msg.header.frame_id = _frameID;

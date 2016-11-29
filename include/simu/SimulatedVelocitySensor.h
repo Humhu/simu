@@ -1,4 +1,6 @@
 #include "simu/SimuCommon.h"
+#include "simu/NoiseGenerator.h"
+
 #include "extrinsics_array/ExtrinsicsInterface.h"
 #include "argus_utils/random/MultivariateGaussian.hpp"
 #include "argus_utils/synchronization/SynchronizationTypes.h"
@@ -25,7 +27,7 @@ private:
 
 	ExtrinsicsInterface _extrinsicsManager;
 	ros::Publisher _velPub;
-	MultivariateGaussian<> _noiseGenerator;
+	NoiseGenerator _noise;
 
 	bool _enableNoise;
 	std::string _frameID;

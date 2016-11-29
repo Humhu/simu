@@ -15,7 +15,7 @@ SimulationCore::SimulationCore( ros::NodeHandle& ph )
 	                         &SimulationCore::TimerCallback,
 	                         this,
 	                         false, // Not one-shot
-	                         true ); // No autostart
+	                         false ); // No autostart
 }
 
 void SimulationCore::RegisterObject( const SimulatedObject::Ptr& obj )

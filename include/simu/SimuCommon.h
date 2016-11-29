@@ -33,16 +33,18 @@ public:
 
 	typedef std::shared_ptr<SimulatedBody> Ptr;
 
-	SimulatedBody( ros::NodeHandle& ph );
+	SimulatedBody( ros::NodeHandle& ph, const std::string& refFrame );
 
-	const std::string& GetFrameID() const;
+	const std::string& GetBodyFrame() const;
+	const std::string& GetReferenceFrame() const;
 
 	virtual PoseSE3 GetPose() const = 0;
 	virtual PoseSE3::TangentVector GetVelocity() const = 0;
 
 private:
 
-	std::string _frameID;
+	std::string _referenceFrame;
+	std::string _bodyFrame;
 };
 
 class SimulatedSensor
@@ -52,7 +54,7 @@ public:
 
 	typedef std::shared_ptr<SimulatedSensor> Ptr;
 	
-	SimulatedSensor( ros::NodeHandle& nh, ros::NodeHandle& ph );
+	SimulatedSensor( ros::NodeHandle& ph );
 
 	virtual void Initialize( const ros::Time& now );
 	virtual void Tic( const ros::Time& now );

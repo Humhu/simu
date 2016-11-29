@@ -6,22 +6,28 @@ namespace argus
 
 SimulatedObject::SimulatedObject() {}
 
-SimulatedBody::SimulatedBody( ros::NodeHandle& ph )
+SimulatedBody::SimulatedBody( ros::NodeHandle& ph,
+                              const std::string& refFrame )
+: _referenceFrame( refFrame )
 {
-	GetParamRequired( ph, "frame_id", _frameID );
+	GetParamRequired( ph, "frame_id", _bodyFrame );
 }
 
-const std::string& SimulatedBody::GetFrameID() const
+const std::string& SimulatedBody::GetBodyFrame() const
 {
-	return _frameID;
+	return _bodyFrame;
 }
 
-SimulatedSensor::SimulatedSensor( ros::NodeHandle& nh,
-                                  ros::NodeHandle& ph )
+const std::string& SimulatedBody::GetReferenceFrame() const
+{
+	return _referenceFrame;
+}
+
+SimulatedSensor::SimulatedSensor( ros::NodeHandle& ph )
 {
 	double initFreq;
 	GetParamRequired( ph, "frequency", initFreq );
-	_frequency.Initialize( nh, initFreq, "frequency",
+	_frequency.Initialize( ph, initFreq, "frequency",
 	                       "Sensor sampling frequency" );
 }
 
@@ -36,6 +42,7 @@ void SimulatedSensor::Tic( const ros::Time& now )
 	{
 		return;
 	}
+	_lastUpdate = now;
 	Sample( now );
 }
 

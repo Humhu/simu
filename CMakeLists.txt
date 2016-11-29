@@ -15,6 +15,7 @@ find_package( catkin REQUIRED
                          extrinsics_array
                          geometry_msgs
                          message_generation
+                         nav_msgs
                          paraset
 )
 
@@ -28,10 +29,12 @@ find_package(Eigen3 REQUIRED)
 
 add_service_files( FILES
                    InitializeSimulation.srv
+                   SetBodyPose.srv
+                   SetBodyVelocity.srv
                    SetNoiseProperties.srv
 )
 
-generate_messages()
+generate_messages( DEPENDENCIES geometry_msgs )
 
 catkin_package( INCLUDE_DIRS     include
 
@@ -41,6 +44,7 @@ catkin_package( INCLUDE_DIRS     include
                                  extrinsics_array
                                  geometry_msgs
                                  message_runtime
+                                 nav_msgs
                                  paraset
 
                 DEPENDS          Boost 
@@ -54,6 +58,7 @@ include_directories( include
                     )
 
 add_library( simu
+            src/NoiseGenerator.cpp
             src/SimulationCore.cpp
             src/SimuCommon.cpp
             src/SimulatedMass.cpp
