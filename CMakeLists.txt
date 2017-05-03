@@ -22,9 +22,6 @@ find_package( catkin REQUIRED
 # Use Boost for most utilities, threading
 find_package(Boost REQUIRED)
 
-# Use Eigen for matrices, linear algebra
-find_package(Eigen3 REQUIRED)
-
 #catkin_python_setup()
 
 add_service_files( FILES
@@ -53,7 +50,6 @@ catkin_package( INCLUDE_DIRS     include
 
 include_directories( include
                     ${Boost_INCLUDE_DIRS}
-                    ${EIGEN3_INCLUDE_DIR}
                     ${catkin_INCLUDE_DIRS}
                     )
 
@@ -68,10 +64,10 @@ target_link_libraries( simu
                       ${Boost_LIBRARIES}
                       ${catkin_LIBRARIES}
                       )
-add_dependencies( simu simu_gencfg ${catkin_EXPORTED_TARGETS} )
+add_dependencies( simu ${catkin_EXPORTED_TARGETS} )
 
 add_executable( simulator_node nodes/simulator_node.cpp )
-add_dependencies( simulator_node simu_gencfg ${catkin_EXPORTED_TARGETS} )
+add_dependencies( simulator_node ${catkin_EXPORTED_TARGETS} )
 target_link_libraries( simulator_node ${catkin_LIBRARIES} simu )
 
 ## Mark executables and/or libraries for installation
