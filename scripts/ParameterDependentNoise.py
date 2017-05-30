@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import rospy
+import rospy, math
 import numpy as np
 from percepto_msgs.srv import SetParameters
 from simu.srv import SetNoiseProperties, SetNoisePropertiesRequest
@@ -35,6 +35,7 @@ class ParameterDependentNoise:
                                            noise_dim )
         self.noise_cov_slope = parse_matrix( rospy.get_param( '~noise_cov_slope' ),
                                              noise_dim )
+        self.noise_rate = rospy.get_param( '~noise_growth_rate' )
 
         noise_topic = rospy.get_param( '~noise_set_service' )
         wait_for_service( noise_topic )
@@ -47,7 +48,8 @@ class ParameterDependentNoise:
     def ComputeNoise( self, p ):
         err = p - self.optimal_params
         scale = err.dot( err )
-        cov = self.min_noise_cov + (scale*self.noise_cov_slope)
+        cov = self.min_noise_cov + \
+              self.noise_cov_slope * (math.exp( self.noise_rate * scale ) - 1.0)
         return self.noise_mean, cov
 
     def ParamCallback( self, req ):

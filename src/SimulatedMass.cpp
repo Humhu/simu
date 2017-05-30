@@ -56,7 +56,7 @@ void SimulatedMass::Tic( const ros::Time& now )
 	x.tail<POSE_DIM>()  = _velocity;
 	double dt = ( now - _simTime ).toSec();
 	
-	MatrixType A = IntegralMatrix<double>( dt, 1 );
+	MatrixType A = IntegralMatrix<double>( dt, POSE_DIM, 1 );
 	VectorType xNext = A * x;
 	VectorType poseNoise = _poseNoise.Sample();
 	_pose = _pose * PoseSE3::Exp( xNext.head<POSE_DIM>() + 

@@ -38,6 +38,11 @@ void SimulatedSensor::Initialize( const ros::Time& now )
 
 void SimulatedSensor::Tic( const ros::Time& now )
 {
+	if( _frequency == 0.0 )
+	{
+		return;
+	}
+	
 	if( now < _lastUpdate + ros::Duration( 1.0/_frequency ) )
 	{
 		return;
